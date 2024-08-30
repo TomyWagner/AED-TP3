@@ -20,7 +20,8 @@ def cargar_envios(registros):
         envio.obtener_tipo_envio(line)
         envio.obtener_forma_pago(line)
 
-        envio.mostrar_info()
+        # funcion de prueba
+        # envio.mostrar_info()
 
 
 if __name__ == "__main__":
