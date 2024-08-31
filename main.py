@@ -37,9 +37,8 @@ def menu():
     """ esta función sirve de menú, verifica el valor ingresado
          y lo devuelve. (Solo muestra las diferentes operaciones
          que puede hacer el programa).
-
-         Debe haber una mejor forma de hacer esto.
     """
+    # Debe haber una mejor forma de hacer esto.
 
     print("1. Obtener registros desde un archivo")
     print("2. Cargar un envío")
