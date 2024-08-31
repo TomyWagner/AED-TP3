@@ -24,7 +24,36 @@ def cargar_envios(registros):
         # envio.mostrar_info()
 
 
+def menu():
+    print("1. Obtener registros desde un archivo")
+    print("2. Cargar un envío")
+    print("3. Salir")
+    opc = input("ingrese una opción: ")
+
+    if opc.isalpha():
+        print("La opción debe ser un valor numérico")
+        return
+
+    elif opc.isnumeric():
+        if int(opc) <= 0 or int(opc) >= 4:
+            print("Seleccione una opción valida.")
+            return
+
+    return int(opc)
+
+
 if __name__ == "__main__":
+    opc = 0
     registros = []
 
-    cargar_envios(registros)
+    while opc != 3:
+        opc = menu()
+
+        if opc == 1:
+            # TODO
+            print("\n\nSeleccionó la opcion número 1\n\n")
+        elif opc == 2:
+            # TODO
+            print("\n\nSeleccionó la opcion número 2\n\n")
+
+    print("El programa finalizó")
