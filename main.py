@@ -1,7 +1,7 @@
 from envio import Envio
 
 
-def cargar_envios(registros):
+def cargar_envios():
     """ función para cargar los registros desde el archivo envíos.txt
 
         Parámetros
@@ -9,28 +9,28 @@ def cargar_envios(registros):
     """
     # FIXME hay un error al verificar
     # cuando se ingresan números y letras
+    envios = []
 
-    archivo = open("envíos-tp3.txt")
+    archivo = open("envios-tp3.txt")
     contenido = archivo.readlines()
     archivo.close()
 
-    contandor_line = 0
-    for line in contenido:
-        contandor_line += 1
-
-        if contandor_line == 1:
+    contandor_linea = 0
+    for linea in contenido:
+        contandor_linea += 1
+        if contandor_linea == 1:
             continue
 
         envio = Envio()
 
-        envio.obtener_codigo_postal(line)
-        envio.obtener_direccion(line)
-        envio.obtener_tipo_envio(line)
-        envio.obtener_forma_pago(line)
+        envio.obtener_codigo_postal(linea)
+        envio.obtener_direccion(linea)
+        envio.obtener_tipo_envio(linea)
+        envio.obtener_forma_pago(linea)
 
-        # función para probar que se carguen
-        # correctamente los datos
-        # envio.mostrar_info()
+        envios.append(envio)
+
+    return envios
 
 
 def menu():
@@ -64,18 +64,29 @@ def menu():
 
 if __name__ == "__main__":
     opc = 0
-    registros = []
+    envios = []
 
     while opc != 4:
         opc = menu()
 
         if opc == 1:
-            # TODO crear el arreglo con los envíos guardados
-            # en el archivo envíos.txt
-            #
-            # Cada vez que se elija esta opción, el arreglo debe ser
-            # creado de nuevo desde cero eliminando el anterior
-            print("\n\nSeleccionó la opción número 1\n\n")
+            # si el arreglo esta vacío
+            # cargar datos
+            if envios == []:
+                envios = cargar_envios()
+                print("\nRegistros cargados\n")
+
+            # si el arreglo no esta vacío
+            # cancelar la operación o volver a cargar
+            else:
+                x = input("Seguro que quieres borrar los registros? (Ss/Nn): ")
+                print("\n")
+                if x in 'Ss':
+                    envios = cargar_envios()
+                print("\nRegistros cargados\n")
+                if x in 'Nn':
+                    print("\nOperación cancelada\n")
+
         elif opc == 2:
             # TODO cargar por teclado los datos de envío, aplicando procesos
             # de validación para los campos tipo de envío y forma de pago,
