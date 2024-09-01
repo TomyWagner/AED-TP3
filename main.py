@@ -62,7 +62,7 @@ def menu():
     return int(opc)
 
 
-if __name__ == "__main__":
+def main():
     opc = 0
     envios = []
 
@@ -135,3 +135,7 @@ if __name__ == "__main__":
             print("\n\nSeleccionó la opción número 3\n\n")
 
     print("El programa finalizó correctamente.")
+
+
+if __name__ == "__main__":
+    main()

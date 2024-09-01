@@ -6,5 +6,5 @@ class Envio:
         self.forma_pago = 0
 
     def mostrar_info(self):
-        print(f"{self.codigo_postal} {self.direccion} {
-              self.tipo_envio} {self.forma_pago}")
+        print(f"| código postal: {self.codigo_postal} | dirección: {self.direccion} | tipo de envío: {
+              self.tipo_envio} | forma de pago: {self.forma_pago} |")
