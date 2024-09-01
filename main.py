@@ -7,8 +7,6 @@ def cargar_envios():
         Parámetros
             registros (Envío[]): Es el arreglo de envíos
     """
-    # FIXME hay un error al verificar
-    # cuando se ingresan números y letras
     envios = []
 
     archivo = open("envios-tp3.txt")
@@ -98,6 +96,7 @@ def main():
             # creo que es porque la función isalpha devuelve True
             # solo si todos los caracteres son letras, lo mismo pasa
             # con isdigit.
+            # FIXME por alguna razón las validaciones toman valores negativos como correctas.
             tipo_envio = input("Ingrese el tipo de envío (del 0 al 6): ")
             while tipo_envio.isalpha() or (tipo_envio.isdigit() and (int(tipo_envio) <= -1 or int(tipo_envio) >= 7)):
                 print("Error")
