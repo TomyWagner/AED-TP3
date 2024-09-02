@@ -1,137 +1,187 @@
 from envio import Envio
 
 
-def cargar_envios():
-    """ función para cargar los registros desde el archivo envíos.txt
-
-        Parámetros
-            registros (Envío[]): Es el arreglo de envíos
+def cargar_envios(): # SIN MODIFICACIÓN (Agus)
+    """
+    PUNTO 1 (Agus): Crear el arreglo de registros/objetos desde un archivo.
+    Función para cargar los envíos desde el archivo 'envios-tp3.txt'.
+    Los registros se almacenan en un arreglo de objetos Envio.
     """
     envios = []
 
+    # Se sbre el archivo y obtienen las líneas
     archivo = open("envios-tp3.txt")
     contenido = archivo.readlines()
     archivo.close()
 
-    contandor_linea = 0
+    contador_linea = 0
     for linea in contenido:
-        contandor_linea += 1
-        if contandor_linea == 1:
+        contador_linea += 1
+        if contador_linea == 1:  # Saltar la primera línea (timestamp)
             continue
 
         envio = Envio()
+        # Carga los datos en los atributos del objeto Envio
         envio.codigo_postal = linea[0:8]
         envio.direccion = linea[9:28]
         envio.tipo_envio = int(linea[29])
         envio.forma_pago = int(linea[30])
 
-        envios.append(envio)
+        envios.append(envio)  # Añadir objeto al arreglo
 
     return envios
 
 
-def menu():
-    """ esta función muestra el menú, verifica el valor ingresado
-         y lo devuelve. (Solo muestra las diferentes operaciones
-         que puede hacer el programa).
+def menu(): # MODIFICADO (TomyWagner): Agrego más opciones y cambio la verificación
     """
-
+    MENÚ (Agus): Función que muestra el menú, verifica el valor ingresado y lo devuelve.
+    """
     print("1. Obtener registros desde un archivo")
     print("2. Cargar un envío")
     print("3. Mostrar envíos")
-    print("4. Salir")
-    opc = input("ingrese una opción: ")
+    print("4. Buscar por dirección y tipo de envío")
+    print("5. Buscar por código postal y cambiar forma de pago")
+    print("6. Determinar cantidad de envíos válidos por tipo")
+    print("7. Determinar importe final acumulado por tipo de envío")
+    print("8. Determinar tipo de envío con mayor importe acumulado")
+    print("9. Calcular importe final promedio y envíos menores a ese promedio")
+    print("10. Salir")
+    opc = input("Ingrese una opción: ")
 
-    # verificación -----
-    if opc == "":
-        print("Seleccione una opción valida.")
-        return
-
-    elif opc.isalpha():
-        print("La opción debe ser un valor numérico")
-        return
-
-    elif opc.isdigit():
-        if int(opc) <= 0 or int(opc) >= 5:
-            print("Seleccione una opción valida.")
-            return
-    # -----------------
-
-    return int(opc)
+    # MODIFICACIÓN (TomyWagner): Verfificación menos mogólica
+    if opc.isdigit() and 1 <= int(opc) <= 10:
+        return int(opc)
+    else:
+        print("Seleccione una opción válida.")
+        return None
 
 
-def main():
+def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio): # NUEVO (TomyWagner): PTO. 4
+    """
+    PUNTO 4: 
+    Buscar si existe en el arreglo un registro/objeto cuya dirección de envío sea igual 
+    a "d" y que sea del tipo de envío "e", siendo "d" y "e" dos valores que se cargan por teclado. 
+    Si existe, mostrar todos sus datos. Si no existe indicar con un mensaje. La búsqueda debe 
+    detenerse al encontrar el primer registro/objeto que coincida con el criterio pedido.
+    """
+    for envio in envios:
+        if envio.direccion == direccion and envio.tipo_envio == tipo_envio:
+            envio.mostrar_info()
+            return True
+    print("No se encontró un envío con esa dirección y tipo.")
+    return False
+
+
+def buscar_por_codigo_postal(envios, codigo_postal): # NUEVO (TomyWagner): PTO. 5
+    """
+    PUNTO 5: 
+    Buscar si existe en el arreglo un registro/objeto cuyo código postal sea igual a cp,
+    siendo cp un valor que se carga por teclado. Si existe, cambiar el valor del campo forma de
+    pago, de forma que pase a valer el valor contrario (si valía 1, que pase a valer 2, y
+    viceversa), y luego mostrar el registro completo modificado. Si no existe indicar con un
+    mensaje. La búsqueda debe detenerse al encontrar el primer registro que coincida con el 
+    criterio pedido.
+    """
+    for envio in envios:
+        if envio.codigo_postal == codigo_postal:
+            # Tiene que cambiar el valor de forma_pago
+            if envio.forma_pago == 1:
+                envio.forma_pago = 2
+            else:
+                envio.forma_pago = 1
+            envio.mostrar_info()
+            return True
+    print("No se encontró un envío con ese código postal.")
+    return False
+
+
+def calcular_importe_inicial(envio): # NUEVO (TomyWagner): TABLA DE PRECIOS 
+    """
+    Calcula el importe inicial según el tipo de envío y el destino.
+    """
+    # Precios simplificados por tipo de envío
+    precios = [1100, 1800, 2450, 8300, 10900, 14300, 17900]
+    return precios[envio.tipo_envio]
+
+
+def main(): # MODIFICADO (TomyWagner: Agregué el resto de opciones)
     opc = 0
     envios = []
+    tipo_control = "HC"  # MODIFICACIÓN (TomyWagner): Por defecto el tipo de control es "HC"
 
-    while opc != 4:
+    while opc != 10:
         opc = menu()
 
-        if opc == 1:
-            # si el arreglo esta vacío
-            # cargar datos
-            if envios == []:
+        if opc is None:
+            continue
+
+        if opc == 1: # PUNTO 1: Cargar datos desde el archivo y crear el arreglo de envíos
+            if not envios:  # MODIFICACIÓN (TomyWagner): Cargar los datos para arreglo vacío
                 envios = cargar_envios()
                 print("\nRegistros cargados\n")
-
-            # si el arreglo no esta vacío,
-            # cancelar la operación o volver a cargar
             else:
                 x = input("Seguro que quieres borrar los registros? (Ss/Nn): ")
                 if x in 'Ss':
-                    print("\nRegistros cargados\n")
+                    print("\nRegistros recargados\n")
                     envios = cargar_envios()
                 if x in 'Nn':
                     print("\nOperación cancelada\n")
 
-        elif opc == 2:
+        elif opc == 2: # PUNTO 2: Cargar un envío manualmente
             print("Carga de datos")
 
-            codigo_postal = input("Ingrese el código postal: ")
-            direccion = input("Ingrese la dirección física: ")
+            codigo_postal = input("Ingrese el código postal: ").strip()
+            direccion = input("Ingrese la dirección física: ").strip()
 
-            # valida el tipo de envío y la forma de pago --------
+            # MODIFICACIÓN (TomyWagner): No entendí el código del Agus
+            tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
+            while not (tipo_envio.isdigit() and 0 <= int(tipo_envio) <= 6):
+                print("Tipo de envío inválido.")
+                tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
 
-            # FIXME hay un error al poner números y letras juntos
-            # creo que es porque la función isalpha devuelve True
-            # solo si todos los caracteres son letras, lo mismo pasa
-            # con isdigit.
-            # FIXME por alguna razón las validaciones toman valores negativos como correctas.
-            tipo_envio = input("Ingrese el tipo de envío (del 0 al 6): ")
-            while tipo_envio.isalpha() or (tipo_envio.isdigit() and (int(tipo_envio) <= -1 or int(tipo_envio) >= 7)):
-                print("Error")
-                tipo_envio = input("Ingrese el tipo de envío (del 0 al 6): ")
-
-            forma_pago = input("Ingrese el tipo de envío (del 1 al 2): ")
-            while forma_pago.isalpha() or (forma_pago.isdigit() and (int(forma_pago) <= 0 or int(forma_pago) >= 3)):
-                print("Error")
-                forma_pago = input("Ingrese el tipo de envío (del 1 al 2): ")
-            # ---------------------------------------------------
+            # MODIFICACIÓN (TomyWagner): No entendí el código del Agus
+            forma_pago = input("Ingrese la forma de pago (1: efectivo, 2: tarjeta): ")
+            while not (forma_pago.isdigit() and 1 <= int(forma_pago) <= 2):
+                print("Forma de pago inválida.")
+                forma_pago = input("Ingrese la forma de pago (1: efectivo, 2: tarjeta): ")
 
             envio = Envio()
             envio.codigo_postal = codigo_postal
             envio.direccion = direccion
-            envio.tipo_envio = tipo_envio
-            envio.forma_pago = forma_pago
+            envio.tipo_envio = int(tipo_envio)
+            envio.forma_pago = int(forma_pago)
 
-            # agrega el envío al final del arreglo
             envios.append(envio)
+            print("\nEnvío cargado exitosamente.\n")
 
-            # código de prueba
-            print("\n\n")
-            for e in envios:
-                e.mostrar_info()
+        elif opc == 3: # PUNTO 3: Mostrar los envíos ordenados por código postal (usar Shellsort)
+            pass
 
-        elif opc == 3:
-            # TODO muestra los objetos del arreglo, ordenados por
-            # código postal, de menor a mayor.
-            # Cada registro debe ocupar una sola linea en pantalla, y debe
-            # mostrarse también el nombre del país que corresponde cada
-            # código postal
-            # Agregar la posibilidad de que el usuario elija si quiere
-            # mostrar todos los registros, o mostrar solo los m primeros
-            # cargando m por teclado
-            print("\n\nSeleccionó la opción número 3\n\n")
+        elif opc == 4: # Punto 4: Buscar por dirección y tipo de envío
+            direccion = input("Ingrese la dirección a buscar: ").strip()
+            tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
+
+            while not (tipo_envio.isdigit() and 0 <= int(tipo_envio) <= 6):
+                print("Tipo de envío inválido.")
+                tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
+            
+            buscar_por_direccion_y_tipo(envios, direccion, int(tipo_envio))
+
+        elif opc == 5: # Punto 5: Buscar por código postal y cambiar forma de pago
+            codigo_postal = input("Ingrese el código postal a buscar: ").strip()
+            buscar_por_codigo_postal(envios, codigo_postal)
+
+        elif opc == 6: # Punto 6: Contar envíos válidos por tipo
+            pass
+
+        elif opc == 7: # Punto 7: Calcular el importe final acumulado por tipo de envío
+            pass
+
+        elif opc == 8: # Punto 8: Determinar el tipo de envío con mayor importe final acumulado
+            pass
+
+        elif opc == 9: # Punto 9: Calcular el importe final promedio y envíos menores a ese promedio
+            pass
 
     print("El programa finalizó correctamente.")
 
