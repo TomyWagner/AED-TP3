@@ -1,6 +1,7 @@
 from envio import Envio
 
 
+# Función para cargar envíos desde un archivo de texto
 def cargar_envios(): # SIN MODIFICACIÓN (Agus)
     """
     PUNTO 1 (Agus): Crear el arreglo de registros/objetos desde un archivo.
@@ -21,17 +22,17 @@ def cargar_envios(): # SIN MODIFICACIÓN (Agus)
             continue
 
         envio = Envio()
-        # Carga los datos en los atributos del objeto Envio
-        envio.codigo_postal = linea[0:8]
-        envio.direccion = linea[9:28]
-        envio.tipo_envio = int(linea[29])
-        envio.forma_pago = int(linea[30])
+        envio.codigo_postal = linea[0:8]  # Extraer código postal
+        envio.direccion = linea[9:28]  # Extraer dirección física
+        envio.tipo_envio = int(linea[29])  # Extraer tipo de envío
+        envio.forma_pago = int(linea[30])  # Extraer forma de pago
 
         envios.append(envio)  # Añadir objeto al arreglo
 
     return envios
 
 
+# Función que muestra el menú y retorna la opción seleccionada por el usuario
 def menu(): # MODIFICADO (TomyWagner): Agrego más opciones y cambio la verificación
     """
     MENÚ (Agus): Función que muestra el menú, verifica el valor ingresado y lo devuelve.
@@ -56,6 +57,7 @@ def menu(): # MODIFICADO (TomyWagner): Agrego más opciones y cambio la verifica
         return None
 
 
+# Función para buscar un envío por dirección y tipo
 def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio): # NUEVO (TomyWagner): PTO. 4
     """
     PUNTO 4: 
@@ -72,6 +74,7 @@ def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio): # NUEVO (TomyWag
     return False
 
 
+# Función para buscar un envío por código postal y cambiar la forma de pago
 def buscar_por_codigo_postal(envios, codigo_postal): # NUEVO (TomyWagner): PTO. 5
     """
     PUNTO 5: 
@@ -84,7 +87,7 @@ def buscar_por_codigo_postal(envios, codigo_postal): # NUEVO (TomyWagner): PTO. 
     """
     for envio in envios:
         if envio.codigo_postal == codigo_postal:
-            # Tiene que cambiar el valor de forma_pago
+            # Cambiar la forma de pago (1 a 2 y 2 a 1)
             if envio.forma_pago == 1:
                 envio.forma_pago = 2
             else:
@@ -95,6 +98,7 @@ def buscar_por_codigo_postal(envios, codigo_postal): # NUEVO (TomyWagner): PTO. 
     return False
 
 
+# Función para calcular el importe inicial de un envío
 def calcular_importe_inicial(envio): # NUEVO (TomyWagner): TABLA DE PRECIOS 
     """
     Calcula el importe inicial según el tipo de envío y el destino.
@@ -104,6 +108,25 @@ def calcular_importe_inicial(envio): # NUEVO (TomyWagner): TABLA DE PRECIOS
     return precios[envio.tipo_envio]
 
 
+# Función para mostrar envíos ordenados por código postal usando Selección Simple
+def mostrar_envios(envios): # NUEVO (TomyWagner): PTO. 3
+    n = len(envios)
+    # Intento de Algoritmo de Selección Simple para ordenar los envíos por código postal
+    # Opción B: La poronga Burbuja esa
+    for i in range(n - 1):
+        minimo = i
+        for j in range(i + 1, n):
+            if envios[j].codigo_postal < envios[minimo].codigo_postal:
+                minimo = j
+        # Intercambiar el mínimo con el primer elemento no ordenado
+        envios[i], envios[minimo] = envios[minimo], envios[i]
+
+    # Mostrar los envíos ordenados
+    for envio in envios:
+        envio.mostrar_info()
+
+
+# Función principal del programa
 def main(): # MODIFICADO (TomyWagner: Agregué el resto de opciones)
     opc = 0
     envios = []
@@ -154,8 +177,8 @@ def main(): # MODIFICADO (TomyWagner: Agregué el resto de opciones)
             envios.append(envio)
             print("\nEnvío cargado exitosamente.\n")
 
-        elif opc == 3: # PUNTO 3: Mostrar los envíos ordenados por código postal (usar Shellsort)
-            pass
+        elif opc == 3:  # Mostrar los envíos ordenados por código postal (Según TP: Selección Simple, no Shellsort)
+            mostrar_envios(envios)
 
         elif opc == 4: # Punto 4: Buscar por dirección y tipo de envío
             direccion = input("Ingrese la dirección a buscar: ").strip()
@@ -184,7 +207,6 @@ def main(): # MODIFICADO (TomyWagner: Agregué el resto de opciones)
             pass
 
     print("El programa finalizó correctamente.")
-
 
 if __name__ == "__main__":
     main()
