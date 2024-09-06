@@ -1,7 +1,6 @@
 from envio import Envio
 
 
-# Función para cargar envíos desde un archivo de texto
 def cargar_envios(): # SIN MODIFICACIÓN (Agus)
     """
     PUNTO 1 (Agus): Crear el arreglo de registros/objetos desde un archivo.
@@ -10,7 +9,7 @@ def cargar_envios(): # SIN MODIFICACIÓN (Agus)
     """
     envios = []
 
-    # Se sbre el archivo y obtienen las líneas
+    # Se abre el archivo y obtienen las líneas
     archivo = open("envios-tp3.txt")
     contenido = archivo.readlines()
     archivo.close()
@@ -18,7 +17,7 @@ def cargar_envios(): # SIN MODIFICACIÓN (Agus)
     contador_linea = 0
     for linea in contenido:
         contador_linea += 1
-        if contador_linea == 1:  # Saltar la primera línea (timestamp)
+        if contador_linea == 1:  # Saltar la primera línea (el timestamp)
             continue
 
         envio = Envio()
@@ -32,8 +31,7 @@ def cargar_envios(): # SIN MODIFICACIÓN (Agus)
     return envios
 
 
-# Función que muestra el menú y retorna la opción seleccionada por el usuario
-def menu(): # MODIFICADO (TomyWagner): Agrego más opciones y cambio la verificación
+def menu(): # MODIFICADO (TomyWagner): Opciones agregadas y cambio de verificación
     """
     MENÚ (Agus): Función que muestra el menú, verifica el valor ingresado y lo devuelve.
     """
@@ -49,7 +47,7 @@ def menu(): # MODIFICADO (TomyWagner): Agrego más opciones y cambio la verifica
     print("10. Salir")
     opc = input("Ingrese una opción: ")
 
-    # MODIFICACIÓN (TomyWagner): Verfificación menos mogólica
+    # MODIFICACIÓN (TomyWagner): Verificación acortada
     if opc.isdigit() and 1 <= int(opc) <= 10:
         return int(opc)
     else:
@@ -57,7 +55,6 @@ def menu(): # MODIFICADO (TomyWagner): Agrego más opciones y cambio la verifica
         return None
 
 
-# Función para buscar un envío por dirección y tipo
 def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio): # NUEVO (TomyWagner): PTO. 4
     """
     PUNTO 4: 
@@ -74,7 +71,6 @@ def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio): # NUEVO (TomyWag
     return False
 
 
-# Función para buscar un envío por código postal y cambiar la forma de pago
 def buscar_por_codigo_postal(envios, codigo_postal): # NUEVO (TomyWagner): PTO. 5
     """
     PUNTO 5: 
@@ -98,7 +94,7 @@ def buscar_por_codigo_postal(envios, codigo_postal): # NUEVO (TomyWagner): PTO. 
     return False
 
 
-# Función para calcular el importe inicial de un envío
+# Función AUXILIAR para calcular el importe inicial de un envío
 def calcular_importe_inicial(envio): # NUEVO (TomyWagner): TABLA DE PRECIOS 
     """
     Calcula el importe inicial según el tipo de envío y el destino.
@@ -108,11 +104,9 @@ def calcular_importe_inicial(envio): # NUEVO (TomyWagner): TABLA DE PRECIOS
     return precios[envio.tipo_envio]
 
 
-# Función para mostrar envíos ordenados por código postal usando Selección Simple
 def mostrar_envios(envios): # NUEVO (TomyWagner): PTO. 3
     n = len(envios)
-    # Intento de Algoritmo de Selección Simple para ordenar los envíos por código postal
-    # Opción B: La poronga Burbuja esa
+    # Algoritmo de Selección Simple para ordenar los envíos por código postal
     for i in range(n - 1):
         minimo = i
         for j in range(i + 1, n):
@@ -126,8 +120,62 @@ def mostrar_envios(envios): # NUEVO (TomyWagner): PTO. 3
         envio.mostrar_info()
 
 
-# Función principal del programa
-def main(): # MODIFICADO (TomyWagner: Agregué el resto de opciones)
+def contar_envios_validos_por_tipo(envios, tipo_control): # NUEVO (TomyWagner): PTO. 6
+    """
+    PUNTO 6: 
+    Si el tipo de control de direcciones en la timestamp era HC, entonces determinar la cantidad
+    de envíos que tengan dirección de envío válida, realizados para cada uno de los siete tipos
+    de envios posibles. Pero si el tipo de control de direcciones era SC, entonces determine
+    la cantidad de envíos de cada uno de los siete tipos posibles, sin importar si la dirección 
+    de envío era válida o no. Observación: ni siquiera se les ocurra plantear un esquema de 7
+    condiciones y siete contadores separados... Esto se resuelve con un vector de conteo o nada...
+    """
+    contador = [0] * 7  # Inicializar un contador para los 7 tipos de envío
+
+    for envio in envios:
+        if tipo_control == "HC":
+            if validar_direccion(envio.direccion):
+                contador[envio.tipo_envio] += 1
+        else:  # tipo_control == "SC"
+            contador[envio.tipo_envio] += 1
+
+    for i in range(7):
+        print(f"Tipo de envío {i}: {contador[i]} envíos")
+
+
+# Función AUXILIAR para validar la dirección (para el control HC)
+def validar_direccion(direccion):
+    """
+    Valida una dirección según las reglas del control HC (Hard Control).
+    Se requiere que la dirección tenga solo letras y dígitos, sin dos mayúsculas seguidas,
+    y que haya al menos una palabra compuesta solo por dígitos.
+    """
+
+    tiene_digitos = False
+    no_mayusculas_seguidas = True
+
+    # RecorreR la dirección por caracter
+    for i in range(len(direccion)):
+        char = direccion[i]
+
+        # Verificar si hay dígitos
+        if '0' <= char <= '9':
+            tiene_digitos = True
+
+        # Verificar si hay dos mayúsculas seguidas
+        if 'A' <= char <= 'Z' and i > 0:
+            char_anterior = direccion[i - 1]
+            if 'A' <= char_anterior <= 'Z':
+                no_mayusculas_seguidas = False
+
+    # La dirección es válida si tiene dígitos y no hay mayúsculas seguidas
+    if tiene_digitos and no_mayusculas_seguidas:
+        return True
+    else:
+        return False
+
+
+def main(): # MODIFICADO (TomyWagner): Todas las opciones agregadas
     opc = 0
     envios = []
     tipo_control = "HC"  # MODIFICACIÓN (TomyWagner): Por defecto el tipo de control es "HC"
@@ -156,13 +204,11 @@ def main(): # MODIFICADO (TomyWagner: Agregué el resto de opciones)
             codigo_postal = input("Ingrese el código postal: ").strip()
             direccion = input("Ingrese la dirección física: ").strip()
 
-            # MODIFICACIÓN (TomyWagner): No entendí el código del Agus
             tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
             while not (tipo_envio.isdigit() and 0 <= int(tipo_envio) <= 6):
                 print("Tipo de envío inválido.")
                 tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
 
-            # MODIFICACIÓN (TomyWagner): No entendí el código del Agus
             forma_pago = input("Ingrese la forma de pago (1: efectivo, 2: tarjeta): ")
             while not (forma_pago.isdigit() and 1 <= int(forma_pago) <= 2):
                 print("Forma de pago inválida.")
@@ -195,7 +241,7 @@ def main(): # MODIFICADO (TomyWagner: Agregué el resto de opciones)
             buscar_por_codigo_postal(envios, codigo_postal)
 
         elif opc == 6: # Punto 6: Contar envíos válidos por tipo
-            pass
+            contar_envios_validos_por_tipo(envios, tipo_control)
 
         elif opc == 7: # Punto 7: Calcular el importe final acumulado por tipo de envío
             pass
@@ -207,6 +253,7 @@ def main(): # MODIFICADO (TomyWagner: Agregué el resto de opciones)
             pass
 
     print("El programa finalizó correctamente.")
+
 
 if __name__ == "__main__":
     main()
