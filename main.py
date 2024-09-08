@@ -1,7 +1,7 @@
 from envio import Envio
 
 
-def cargar_envios(): # SIN MODIFICACIÓN
+def cargar_envios():  # SIN MODIFICACIÓN
     """
     PUNTO 1:
     Crear el arreglo de registros/objetos desde un archivo.
@@ -15,15 +15,49 @@ def cargar_envios(): # SIN MODIFICACIÓN
     contenido = archivo.readlines()
     archivo.close()
 
+    tipo_de_control = ""
+    car_anterior = ""
+
     contador_linea = 0
     for linea in contenido:
         contador_linea += 1
+
         if contador_linea == 1:  # Saltar la primera línea (el timestamp)
+            for car in linea:
+                if car_anterior in 'Hh' and car in 'Cc':
+                    tipo_de_control = "HC"
+                elif car_anterior in 'Ss' and car in 'Cc':
+                    tipo_de_control = "SC"
+
+                car_anterior = car
+
+            continue
+
+        # Verifica la dirección, solo si es HC
+        direccion = linea[9:28]
+
+        mayus_seguidas = False
+        contiene_simbolos = False
+        if tipo_de_control == "HC":
+            car_anterior = ""
+            for car in direccion:
+
+                if car.isupper() and car_anterior.isupper():
+                    mayus_seguidas = True
+
+                if not car.isalpha() and not car.isdigit() and car not in ' .':
+                    contiene_simbolos = True
+
+                car_anterior = car
+
+        # si no pasa las verificaciones salta
+        # toda la parte de agregar un nuevo envío
+        if mayus_seguidas or contiene_simbolos:
             continue
 
         envio = Envio()
-        envio.codigo_postal = linea[0:8]  # Extraer código postal
-        envio.direccion = linea[9:28]  # Extraer dirección física
+        envio.codigo_postal = linea[0:8]   # Extraer código postal
+        envio.direccion = direccion  # Dirección
         envio.tipo_envio = int(linea[29])  # Extraer tipo de envío
         envio.forma_pago = int(linea[30])  # Extraer forma de pago
 
@@ -32,7 +66,7 @@ def cargar_envios(): # SIN MODIFICACIÓN
     return envios
 
 
-def menu(): # MODIFICADO: Opciones agregadas y cambio de verificación
+def menu():  # MODIFICADO: Opciones agregadas y cambio de verificación
     print("1. Obtener registros desde un archivo")
     print("2. Cargar un envío")
     print("3. Mostrar envíos")
@@ -54,7 +88,7 @@ def menu(): # MODIFICADO: Opciones agregadas y cambio de verificación
     return None
 
 
-def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio): # PTO. 4
+def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio):  # PTO. 4
     """
     PUNTO 4: 
     Buscar si existe en el arreglo un registro/objeto cuya dirección de envío sea igual 
@@ -70,7 +104,7 @@ def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio): # PTO. 4
     return False
 
 
-def buscar_por_codigo_postal(envios, codigo_postal): # PTO. 5
+def buscar_por_codigo_postal(envios, codigo_postal):  # PTO. 5
     """
     PUNTO 5: 
     Buscar si existe en el arreglo un registro/objeto cuyo código postal sea igual a cp,
@@ -94,7 +128,7 @@ def buscar_por_codigo_postal(envios, codigo_postal): # PTO. 5
 
 
 # Función AUXILIAR para calcular el importe inicial de un envío
-def calcular_importe_inicial(envio): # TABLA DE PRECIOS 
+def calcular_importe_inicial(envio):  # TABLA DE PRECIOS
     """
     Calcula el importe inicial según el tipo de envío y el destino.
     """
@@ -103,7 +137,7 @@ def calcular_importe_inicial(envio): # TABLA DE PRECIOS
     return precios[envio.tipo_envio]
 
 
-def mostrar_envios(envios): # PTO. 3
+def mostrar_envios(envios):  # PTO. 3
     n = len(envios)
     # Algoritmo de Selección Simple para ordenar los envíos por código postal
     for i in range(n - 1):
@@ -119,7 +153,7 @@ def mostrar_envios(envios): # PTO. 3
         envio.mostrar_info()
 
 
-def contar_envios_validos_por_tipo(envios, tipo_control): # PTO. 6
+def contar_envios_validos_por_tipo(envios, tipo_control):  # PTO. 6
     """
     PUNTO 6: 
     Si el tipo de control de direcciones en la timestamp era HC, entonces determinar la cantidad
@@ -169,7 +203,7 @@ def validar_direccion(direccion):
         return False
 
 
-def calcular_importe_acumulado_por_tipo(envios, tipo_control): # PTO. 7
+def calcular_importe_acumulado_por_tipo(envios, tipo_control):  # PTO. 7
     """
     PUNTO 7:
     Si el tipo de control de direcciones en la timestamp era HC, entonces determinar el importe
@@ -199,7 +233,7 @@ def calcular_importe_acumulado_por_tipo(envios, tipo_control): # PTO. 7
     return acumulador
 
 
-def determinar_mayor_importe_acumulado(acumulador): # PTO. 8
+def determinar_mayor_importe_acumulado(acumulador):  # PTO. 8
     """
     PUNTO 8:
     En base al resultado obtenido en el punto 7, determinar y mostrar cuál fue el tipo de
@@ -223,11 +257,12 @@ def determinar_mayor_importe_acumulado(acumulador): # PTO. 8
 
     porcentaje = (max_importe / total_acumulado) * 100
 
-    print("El tipo de envío con mayor importe acumulado es el tipo", tipo_mayor, "con $", max_importe)
+    print("El tipo de envío con mayor importe acumulado es el tipo",
+          tipo_mayor, "con $", max_importe)
     print("Este importe representa el", porcentaje, "% del total acumulado.")
 
 
-def calcular_importe_promedio(envios): # PTO. 9
+def calcular_importe_promedio(envios):  # PTO. 9
     """
     PUNTO 9:
     Calcular y mostrar el importe final promedio entre todos los envíos del arreglo, e informar
@@ -244,7 +279,7 @@ def calcular_importe_promedio(envios): # PTO. 9
             importe_final = int(importe_inicial * 0.9)
         else:
             importe_final = importe_inicial
-        
+
         total_importe += importe_final
         importes_finales.append(importe_final)
 
@@ -265,7 +300,7 @@ def calcular_importe_promedio(envios): # PTO. 9
     print("Cantidad de envíos con importe menor al promedio:", menores_al_promedio)
 
 
-def main(): # Todas las opciones agregadas
+def main():  # Todas las opciones agregadas
     opc = 0
     envios = []
     tipo_control = "HC"  # Por defecto el tipo de control es "HC"
@@ -277,7 +312,7 @@ def main(): # Todas las opciones agregadas
         if opc == None:
             continue
 
-        if opc == 1: # PUNTO 1: Cargar datos desde el archivo y crear el arreglo de envíos
+        if opc == 1:  # PUNTO 1: Cargar datos desde el archivo y crear el arreglo de envíos
             if len(envios) == 0:  # Cargar los datos para arreglo vacío
                 envios = cargar_envios()
                 print("\nRegistros cargados\n")
@@ -289,7 +324,7 @@ def main(): # Todas las opciones agregadas
                 elif x == 'N' or x == 'n':
                     print("\nOperación cancelada\n")
 
-        elif opc == 2: # PUNTO 2: Cargar un envío manualmente
+        elif opc == 2:  # PUNTO 2: Cargar un envío manualmente
             print("Carga de datos")
 
             codigo_postal = input("Ingrese el código postal: ").strip()
@@ -300,10 +335,12 @@ def main(): # Todas las opciones agregadas
                 print("Tipo de envío inválido.")
                 tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
 
-            forma_pago = input("Ingrese la forma de pago (1: efectivo, 2: tarjeta): ")
+            forma_pago = input(
+                "Ingrese la forma de pago (1: efectivo, 2: tarjeta): ")
             while forma_pago.isdigit() == False or int(forma_pago) < 1 or int(forma_pago) > 2:
                 print("Forma de pago inválida.")
-                forma_pago = input("Ingrese la forma de pago (1: efectivo, 2: tarjeta): ")
+                forma_pago = input(
+                    "Ingrese la forma de pago (1: efectivo, 2: tarjeta): ")
 
             envio = Envio()
             envio.codigo_postal = codigo_postal
@@ -314,36 +351,40 @@ def main(): # Todas las opciones agregadas
             envios.append(envio)
             print("\nEnvío cargado exitosamente.\n")
 
-        elif opc == 3:  # Mostrar los envíos ordenados por código postal (Selección Simple)
+        # Mostrar los envíos ordenados por código postal (Selección Simple)
+        elif opc == 3:
             mostrar_envios(envios)
 
-        elif opc == 4: # Punto 4: Buscar por dirección y tipo de envío
+        elif opc == 4:  # Punto 4: Buscar por dirección y tipo de envío
             direccion = input("Ingrese la dirección a buscar: ").strip()
             tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
 
-            while tipo_envio.isdigit() == False or int(tipo_envio) < 0 or int(tipo_envio) > 6:
+            # modifique el while pa que quede mas falopa
+            while not tipo_envio.isdigit() or int(tipo_envio) < 0 or int(tipo_envio) > 6:
                 print("Tipo de envío inválido.")
                 tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
-            
+
             buscar_por_direccion_y_tipo(envios, direccion, int(tipo_envio))
 
-        elif opc == 5: # Punto 5: Buscar por código postal y cambiar forma de pago
-            codigo_postal = input("Ingrese el código postal a buscar: ").strip()
+        elif opc == 5:  # Punto 5: Buscar por código postal y cambiar forma de pago
+            codigo_postal = input(
+                "Ingrese el código postal a buscar: ").strip()
             buscar_por_codigo_postal(envios, codigo_postal)
 
-        elif opc == 6: # Punto 6: Contar envíos válidos por tipo
+        elif opc == 6:  # Punto 6: Contar envíos válidos por tipo
             contar_envios_validos_por_tipo(envios, tipo_control)
 
-        elif opc == 7: # Punto 7: Calcular el importe final acumulado por tipo de envío
-            acumulador = calcular_importe_acumulado_por_tipo(envios, tipo_control)
+        elif opc == 7:  # Punto 7: Calcular el importe final acumulado por tipo de envío
+            acumulador = calcular_importe_acumulado_por_tipo(
+                envios, tipo_control)
 
-        elif opc == 8: # Punto 8: Determinar el tipo de envío con mayor importe final acumulado
+        elif opc == 8:  # Punto 8: Determinar el tipo de envío con mayor importe final acumulado
             if len(acumulador) > 0:  # Verificar si ya se ha calculado el acumulador
                 determinar_mayor_importe_acumulado(acumulador)
             else:
                 print("Primero debe calcular el importe acumulado (Opción 7).")
 
-        elif opc == 9: # Punto 9: Calcular el importe final promedio y envíos menores a ese promedio
+        elif opc == 9:  # Punto 9: Calcular el importe final promedio y envíos menores a ese promedio
             calcular_importe_promedio(envios)
 
     print("El programa finalizó correctamente.")
