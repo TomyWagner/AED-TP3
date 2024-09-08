@@ -154,7 +154,8 @@ def validar_direccion(direccion):
     """
 
     tiene_digitos = False
-    no_mayusculas_seguidas = True
+    mayusculas_seguidas = False
+    tiene_simbolos = False
 
     # RecorreR la dirección por caracter
     for i in range(len(direccion)):
@@ -166,9 +167,13 @@ def validar_direccion(direccion):
         if char >= 'A' and char <= 'Z' and i > 0:
             char_anterior = direccion[i - 1]
             if char_anterior >= 'A' and char_anterior <= 'Z':
-                no_mayusculas_seguidas = False
+                mayusculas_seguidas = True
+        # Verificar si tiene simbolos
+        if not char.isdigit() and not char.isalpha() and char not in " .":
+            tiene_simbolos = True
+
     # La dirección es válida si tiene dígitos y no hay mayúsculas seguidas
-    if tiene_digitos == True and no_mayusculas_seguidas == True:
+    if tiene_digitos and not mayusculas_seguidas and not tiene_simbolos:
         return True
     else:
         return False
@@ -188,7 +193,7 @@ def calcular_importe_acumulado_por_tipo(envios, tipo_control):  # PTO. 7
     for envio in envios:
         importe_inicial = calcular_importe_inicial(envio)
         if envio.forma_pago == 1:  # Descuento por EFECTIVO
-            importe_final = int(importe_inicial * 0.9)
+            importe_final = int(importe_inicial) * 0.9
         else:
             importe_final = importe_inicial
 
@@ -199,7 +204,7 @@ def calcular_importe_acumulado_por_tipo(envios, tipo_control):  # PTO. 7
             acumulador[envio.tipo_envio] += importe_final
 
     for i in range(7):
-        print("Tipo de envío", i, ":", acumulador[i], "acumulados")
+        print("Tipo de envío", i, ":", int(acumulador[i]), "acumulados")
 
     return acumulador
 
