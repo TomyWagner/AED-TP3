@@ -34,16 +34,23 @@ def cargar_envios():  # SIN MODIFICACIÓN
             continue
 
         # Verifica la dirección, solo si es HC
-        direccion = linea[9:28]
+        direccion = linea[9:29]
 
-        mayus_seguidas = False
+        cant_mayus = 0
         contiene_simbolos = False
+        contiene_mayus = False
         if tipo_de_control == "HC":
             car_anterior = ""
             for car in direccion:
 
-                if car.isupper() and car_anterior.isupper():
-                    mayus_seguidas = True
+                if car_anterior.isupper():
+                    cant_mayus += 1
+
+                if cant_mayus > 1:
+                    contiene_mayus = True
+
+                if car_anterior == " ":
+                    cant_mayus = 0
 
                 if not car.isalpha() and not car.isdigit() and car not in ' .':
                     contiene_simbolos = True
@@ -52,11 +59,11 @@ def cargar_envios():  # SIN MODIFICACIÓN
 
         # si no pasa las verificaciones salta
         # toda la parte de agregar un nuevo envío
-        if mayus_seguidas or contiene_simbolos:
+        if contiene_mayus or contiene_simbolos:
             continue
 
         envio = Envio()
-        envio.codigo_postal = linea[0:8]   # Extraer código postal
+        envio.codigo_postal = linea[0:9]   # Extraer código postal
         envio.direccion = direccion  # Dirección
         envio.tipo_envio = int(linea[29])  # Extraer tipo de envío
         envio.forma_pago = int(linea[30])  # Extraer forma de pago
@@ -97,7 +104,11 @@ def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio):  # PTO. 4
     detenerse al encontrar el primer registro/objeto que coincida con el criterio pedido.
     """
     for envio in envios:
-        if envio.direccion == direccion and envio.tipo_envio == tipo_envio:
+        # ARREGLAO B)
+        # esta parte no estaba funcionando porque
+        # buscaba la dirección completa con espacios
+        # y nunca se iba a corresponder con lo que ingrese el usuario
+        if direccion in envio.direccion and envio.tipo_envio == tipo_envio:
             envio.mostrar_info()
             return True
     print("No se encontró un envío con esa dirección y tipo.")
@@ -331,13 +342,13 @@ def main():  # Todas las opciones agregadas
             direccion = input("Ingrese la dirección física: ").strip()
 
             tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
-            while tipo_envio.isdigit() == False or int(tipo_envio) < 0 or int(tipo_envio) > 6:
+            while tipo_envio.isdigit() is False or int(tipo_envio) < 0 or int(tipo_envio) > 6:
                 print("Tipo de envío inválido.")
                 tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
 
             forma_pago = input(
                 "Ingrese la forma de pago (1: efectivo, 2: tarjeta): ")
-            while forma_pago.isdigit() == False or int(forma_pago) < 1 or int(forma_pago) > 2:
+            while forma_pago.isdigit() is False or int(forma_pago) < 1 or int(forma_pago) > 2:
                 print("Forma de pago inválida.")
                 forma_pago = input(
                     "Ingrese la forma de pago (1: efectivo, 2: tarjeta): ")
@@ -360,7 +371,7 @@ def main():  # Todas las opciones agregadas
             tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
 
             # modifique el while pa que quede mas falopa
-            while not tipo_envio.isdigit() or int(tipo_envio) < 0 or int(tipo_envio) > 6:
+            while tipo_envio.isdigit() is False or int(tipo_envio) < 0 or int(tipo_envio) > 6:
                 print("Tipo de envío inválido.")
                 tipo_envio = input("Ingrese el tipo de envío (0 al 6): ")
 
