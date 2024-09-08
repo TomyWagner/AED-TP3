@@ -57,10 +57,10 @@ def menu():  # MODIFICADO: Opciones agregadas y cambio de verificación
 
 def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio):  # PTO. 4
     """
-    PUNTO 4: 
-    Buscar si existe en el arreglo un registro/objeto cuya dirección de envío sea igual 
-    a "d" y que sea del tipo de envío "e", siendo "d" y "e" dos valores que se cargan por teclado. 
-    Si existe, mostrar todos sus datos. Si no existe indicar con un mensaje. La búsqueda debe 
+    PUNTO 4:
+    Buscar si existe en el arreglo un registro/objeto cuya dirección de envío sea igual
+    a "d" y que sea del tipo de envío "e", siendo "d" y "e" dos valores que se cargan por teclado.
+    Si existe, mostrar todos sus datos. Si no existe indicar con un mensaje. La búsqueda debe
     detenerse al encontrar el primer registro/objeto que coincida con el criterio pedido.
     """
     for envio in envios:
@@ -77,12 +77,12 @@ def buscar_por_direccion_y_tipo(envios, direccion, tipo_envio):  # PTO. 4
 
 def buscar_por_codigo_postal(envios, codigo_postal):  # PTO. 5
     """
-    PUNTO 5: 
+    PUNTO 5:
     Buscar si existe en el arreglo un registro/objeto cuyo código postal sea igual a cp,
     siendo cp un valor que se carga por teclado. Si existe, cambiar el valor del campo forma de
     pago, de forma que pase a valer el valor contrario (si valía 1, que pase a valer 2, y
     viceversa), y luego mostrar el registro completo modificado. Si no existe indicar con un
-    mensaje. La búsqueda debe detenerse al encontrar el primer registro que coincida con el 
+    mensaje. La búsqueda debe detenerse al encontrar el primer registro que coincida con el
     criterio pedido.
     """
     for envio in envios:
@@ -98,13 +98,50 @@ def buscar_por_codigo_postal(envios, codigo_postal):  # PTO. 5
     return False
 
 
-# Función AUXILIAR para calcular el importe inicial de un envío
+# Función para calcular el importe inicial de un envío
 def calcular_importe_inicial(envio):  # TABLA DE PRECIOS
     """
     Calcula el importe inicial según el tipo de envío y el destino.
     """
     # Precios simplificados por tipo de envío
     precios = [1100, 1800, 2450, 8300, 10900, 14300, 17900]
+
+    # obtener el país dependiendo del codigo postal
+    codigo_postal = envio.codigo_postal
+
+    pais = "Otro"
+    if len(codigo_postal) == 8 and codigo_postal[0].isalpha() and codigo_postal[1:5].isdigit() and codigo_postal[5:8].isalpha():
+        pais = "Argentina"
+    elif len(codigo_postal) == 4 and codigo_postal.isdigit():
+        pais = "Bolivia"
+    elif len(codigo_postal) == 9 and codigo_postal[:5].isdigit() and codigo_postal[5] == '-' and codigo_postal[6:].isdigit():
+        pais = "Brasil"
+    elif len(codigo_postal) == 7 and codigo_postal.isdigit():
+        pais = "Chile"
+    elif len(codigo_postal) == 6 and codigo_postal.isdigit():
+        pais = "Paraguay"
+    elif len(codigo_postal) == 5 and codigo_postal.isdigit():
+        pais = "Uruguay"
+
+    # bolivia, paraguay, uruguay (montevideo)
+    if pais == "Bolivia" or pais == "Paraguay" or (pais == "Uruguay" and codigo_postal[0] == "1"):
+        precios[envio.tipo_envio] += (precios[envio.tipo_envio] // 100) * 20
+    # chile, uruguay (no montevideo)
+    elif pais == "Chile" or (pais == "Uruguay" and codigo_postal[0] != "1"):
+        precios[envio.tipo_envio] += (precios[envio.tipo_envio] // 100) * 25
+    # brasil (0 al 3)
+    elif pais == "Brasil" and (0 >= int(codigo_postal[0]) <= 3):
+        precios[envio.tipo_envio] += (precios[envio.tipo_envio] // 100) * 25
+    # brasil (4 al 7)
+    elif pais == "Brasil" and (4 >= int(codigo_postal[0]) <= 7):
+        precios[envio.tipo_envio] += (precios[envio.tipo_envio] // 100) * 30
+    # brasil (8, 9)
+    elif pais == "Brasil" and (codigo_postal[0] == "8" or codigo_postal[0] == "9"):
+        precios[envio.tipo_envio] += (precios[envio.tipo_envio] // 100) * 20
+    # otro
+    elif pais == "Otro":
+        precios[envio.tipo_envio] += (precios[envio.tipo_envio] // 100) * 50
+
     return precios[envio.tipo_envio]
 
 
@@ -193,7 +230,7 @@ def calcular_importe_acumulado_por_tipo(envios, tipo_control):  # PTO. 7
     for envio in envios:
         importe_inicial = calcular_importe_inicial(envio)
         if envio.forma_pago == 1:  # Descuento por EFECTIVO
-            importe_final = int(importe_inicial) * 0.9
+            importe_final = importe_inicial + (importe_inicial // 100) * 10
         else:
             importe_final = importe_inicial
 
@@ -235,7 +272,7 @@ def determinar_mayor_importe_acumulado(acumulador):  # PTO. 8
 
     print("El tipo de envío con mayor importe acumulado es el tipo",
           tipo_mayor, "con $", max_importe)
-    print("Este importe representa el", porcentaje, "% del total acumulado.")
+    print("Este importe representa el", round(porcentaje, 2), "% del total acumulado.")
 
 
 def calcular_importe_promedio(envios):  # PTO. 9
