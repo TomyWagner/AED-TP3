@@ -15,56 +15,16 @@ def cargar_envios():  # SIN MODIFICACIÓN
     contenido = archivo.readlines()
     archivo.close()
 
-    tipo_de_control = ""
-    car_anterior = ""
-
     contador_linea = 0
     for linea in contenido:
         contador_linea += 1
 
         if contador_linea == 1:  # Saltar la primera línea (el timestamp)
-            for car in linea:
-                if car_anterior in 'Hh' and car in 'Cc':
-                    tipo_de_control = "HC"
-                elif car_anterior in 'Ss' and car in 'Cc':
-                    tipo_de_control = "SC"
-
-                car_anterior = car
-
-            continue
-
-        # Verifica la dirección, solo si es HC
-        direccion = linea[9:29]
-
-        cant_mayus = 0
-        contiene_simbolos = False
-        contiene_mayus = False
-        if tipo_de_control == "HC":
-            car_anterior = ""
-            for car in direccion:
-
-                if car_anterior.isupper():
-                    cant_mayus += 1
-
-                if cant_mayus > 1:
-                    contiene_mayus = True
-
-                if car_anterior == " ":
-                    cant_mayus = 0
-
-                if not car.isalpha() and not car.isdigit() and car not in ' .':
-                    contiene_simbolos = True
-
-                car_anterior = car
-
-        # si no pasa las verificaciones salta
-        # toda la parte de agregar un nuevo envío
-        if contiene_mayus or contiene_simbolos:
             continue
 
         envio = Envio()
         envio.codigo_postal = linea[0:9]   # Extraer código postal
-        envio.direccion = direccion  # Dirección
+        envio.direccion = linea[9:29]  # Dirección
         envio.tipo_envio = int(linea[29])  # Extraer tipo de envío
         envio.forma_pago = int(linea[30])  # Extraer forma de pago
 
