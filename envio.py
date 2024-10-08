@@ -1,10 +1,15 @@
 class Envio:
-    def __init__(self):
-        self.codigo_postal = ""
-        self.direccion = ""
-        self.tipo_envio = 0
-        self.forma_pago = 0
+    def __init__(self,codigo,dire,tipo_envio,forma_pago):
+        self.cp = codigo
+        self.direccion = dire
+        self.tipo = tipo_envio
+        self.forma = forma_pago
 
-    def mostrar_info(self):
-        print(f"| código postal: {self.codigo_postal} | dirección: {self.direccion} | tipo de envío: {
-              self.tipo_envio} | forma de pago: {self.forma_pago} |")
+    def __str__(self):
+        a = "Código postal: " + str(self.cp)
+        a += " - Dirección física del destino: " + str(self.direccion)
+        a += " - Tipo de envío: " + str(self.tipo)
+        a += " - Forma de pago: " + str(self.forma)
+
+        return a
+
